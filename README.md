@@ -1,8 +1,15 @@
-# GroundedAI
+<h1 align="left">
+  <img
+    src="frontend/public/logo.svg"
+    alt="GroundedAI Logo"
+    width="40"
+    style="vertical-align: middle; margin-right: 10px;"
+  />
+  GroundedAI
+</h1>
 
-![GroundedAI Logo](frontend/public/logo.svg)
+<p><strong>Document-grounded Q&A with verifiable citations</strong></p>
 
-**Document-grounded Q&A with verifiable citations**
 
 ---
 
