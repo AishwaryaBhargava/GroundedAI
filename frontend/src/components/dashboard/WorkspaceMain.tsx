@@ -10,8 +10,8 @@ import {
   GlobalWorkerOptions,
   getDocument,
   type PDFDocumentProxy,
-  type TextItem,
 } from "pdfjs-dist";
+import type { TextItem } from "pdfjs-dist/types/src/display/api";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min?url";
 
 const ACCEPTED_TYPES = [
