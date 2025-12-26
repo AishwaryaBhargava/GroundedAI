@@ -1,0 +1,12 @@
+/* theme.css */
+:root {
+  --bg-main: #e8fcf5;
+  --primary: #8ed4c4;
+  --primary-dark: #6fbba8;
+
+  --text-main: #000000;
+  --text-muted: #2a2a2a;
+
+  --font-heading: "Outfit", sans-serif;
+  --font-body: "Outfit", sans-serif;
+}

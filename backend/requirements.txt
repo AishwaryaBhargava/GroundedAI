@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
+supabase
+python-multipart
+pymupdf
+tiktoken
+httpx
+pgvector
+openai
+python-docx
+python-pptx

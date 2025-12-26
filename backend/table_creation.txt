@@ -1,0 +1,184 @@
+-- Enable UUID generation
+create extension if not exists "pgcrypto";
+
+-- Optional for later RAG (Phase 4). You can leave it enabled now.
+create extension if not exists vector;
+
+-- USERS (logged-in via Firebase)
+create table if not exists public.users (
+  id uuid primary key default gen_random_uuid(),
+  firebase_uid text unique not null,
+  email text,
+  created_at timestamptz not null default now(),
+  last_login_at timestamptz
+);
+
+-- GUESTS (no-login sessions)
+create table if not exists public.guests (
+  id uuid primary key default gen_random_uuid(),
+  session_id text unique not null,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz
+);
+
+-- WORKSPACES
+create table if not exists public.workspaces (
+  id uuid primary key default gen_random_uuid(),
+  owner_user_id uuid references public.users(id) on delete cascade,
+  owner_guest_id uuid references public.guests(id) on delete cascade,
+  name text not null default 'Untitled Workspace',
+  is_guest boolean not null default false,
+  created_at timestamptz not null default now(),
+
+  constraint workspaces_owner_check check (
+    (owner_user_id is not null and owner_guest_id is null)
+    or
+    (owner_user_id is null and owner_guest_id is not null)
+  )
+);
+
+create index if not exists idx_workspaces_owner_user on public.workspaces(owner_user_id);
+create index if not exists idx_workspaces_owner_guest on public.workspaces(owner_guest_id);
+
+-- DOCUMENTS (metadata only)
+create table if not exists public.documents (
+  id uuid primary key default gen_random_uuid(),
+  workspace_id uuid not null references public.workspaces(id) on delete cascade,
+  filename text not null,
+  file_type text not null,
+  file_size integer not null,
+  storage_path text not null,
+  status text not null default 'uploaded',
+  error_message text,
+  created_at timestamptz not null default now(),
+
+  constraint documents_status_check check (status in ('uploaded', 'processing', 'ready', 'failed'))
+);
+
+create index if not exists idx_documents_workspace on public.documents(workspace_id);
+
+-- (Optional now, required later) DOCUMENT SUMMARIES
+create table if not exists public.document_summaries (
+  id uuid primary key default gen_random_uuid(),
+  document_id uuid not null unique references public.documents(id) on delete cascade,
+  bullet_points jsonb not null default '[]'::jsonb,
+  narrative_summary text not null default '',
+  suggested_questions jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+-- (Optional now, required later) CHUNKS (includes embedding column for pgvector)
+create table if not exists public.document_chunks (
+  id uuid primary key default gen_random_uuid(),
+  document_id uuid not null references public.documents(id) on delete cascade,
+  workspace_id uuid not null references public.workspaces(id) on delete cascade,
+  chunk_index integer not null,
+  content text not null,
+  page_start integer,
+  page_end integer,
+  section_title text,
+  embedding vector(1536), -- adjust dimension later based on embedding model
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_chunks_document on public.document_chunks(document_id);
+create index if not exists idx_chunks_workspace on public.document_chunks(workspace_id);
+
+-- (Optional now, required later) CHAT MESSAGES
+create table if not exists public.chat_messages (
+  id uuid primary key default gen_random_uuid(),
+  workspace_id uuid not null references public.workspaces(id) on delete cascade,
+  role text not null,
+  content text not null,
+  citations jsonb,
+  created_at timestamptz not null default now(),
+
+  constraint chat_role_check check (role in ('user', 'assistant'))
+);
+
+create index if not exists idx_chat_workspace on public.chat_messages(workspace_id);
+
+create table if not exists public.document_chunks (
+  id uuid primary key default gen_random_uuid(),
+  document_id uuid not null references public.documents(id) on delete cascade,
+  workspace_id uuid not null references public.workspaces(id) on delete cascade,
+
+  chunk_index int not null,
+  page_start int not null,
+  page_end int not null,
+
+  token_count int not null,
+  content text not null,
+
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_document_chunks_document_id
+  on public.document_chunks(document_id);
+
+create index if not exists idx_document_chunks_workspace_id
+  on public.document_chunks(workspace_id);
+
+alter table public.document_chunks
+add column if not exists token_count int not null default 0;
+
+create extension if not exists vector;
+
+alter table public.document_chunks
+add column if not exists embedding vector(1536);
+
+create index if not exists idx_document_chunks_embedding_ivfflat
+on public.document_chunks
+using ivfflat (embedding vector_cosine_ops)
+with (lists = 100);
+
+analyze public.document_chunks;
+
+SELECT conname, pg_get_constraintdef(oid)
+FROM pg_constraint
+WHERE conname = 'documents_status_check';
+
+ALTER TABLE documents
+DROP CONSTRAINT documents_status_check;
+
+ALTER TABLE documents
+ADD CONSTRAINT documents_status_check
+CHECK (
+  status IN (
+    'uploaded',
+    'embedding',
+    'embedded',
+    'failed_embedding'
+  )
+);
+
+ALTER TABLE public.document_summaries
+ADD COLUMN status TEXT NOT NULL DEFAULT 'pending',
+ADD COLUMN error_reason TEXT,
+ADD COLUMN model TEXT,
+ADD COLUMN token_usage INTEGER,
+ADD COLUMN updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+
+create table public.document_chat_history (
+  id uuid not null default gen_random_uuid(),
+  document_id uuid not null,
+
+  query text not null,
+  answer text null,
+
+  citations jsonb not null default '[]'::jsonb,
+
+  refused boolean not null default false,
+  refusal_reason text null,
+
+  model text null,
+  token_usage integer null,
+
+  created_at timestamp with time zone not null default now(),
+
+  constraint document_chat_history_pkey primary key (id),
+  constraint document_chat_history_document_id_fkey
+    foreign key (document_id)
+    references documents (id)
+    on delete cascade
+);

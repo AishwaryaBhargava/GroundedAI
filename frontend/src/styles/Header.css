@@ -1,0 +1,27 @@
+.app-header {
+  background-color: var(--primary);
+  padding: 14px 40px;
+  display: flex;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.header-left img {
+  width: 34px;
+  height: 34px;
+}
+
+.app-title {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  color: #000;
+}

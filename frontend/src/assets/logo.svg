@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="GroundedAI logo icon">
+  <!-- Black circle background -->
+  <circle cx="256" cy="256" r="256" fill="#000000"/>
+  
+  <!-- Colors -->
+  <!-- Book left (blue), book right (green), magnifier (blue), check (green) -->
+  <!-- Book: left page -->
+  <path d="M84 132c0-20 16-36 36-36h126c28 0 52 10 72 26v260c-20-16-44-26-72-26H120c-20 0-36 16-36 36V132z"
+        fill="#1f7ae0"/>
+  <!-- Book: right page -->
+  <path d="M428 132c0-20-16-36-36-36H266c-28 0-52 10-72 26v260c20-16 44-26 72-26h126c20 0 36 16 36 36V132z"
+        fill="#36c46a"/>
+  <!-- Book inner lines (subtle) -->
+  <path d="M130 160h150M130 200h150M130 240h150"
+        stroke="rgba(255,255,255,0.55)" stroke-width="10" stroke-linecap="round"/>
+  <path d="M282 160h100M282 200h100M282 240h100"
+        stroke="rgba(255,255,255,0.45)" stroke-width="10" stroke-linecap="round"/>
+  <!-- Center spine highlight -->
+  <path d="M256 120v300" stroke="rgba(255,255,255,0.45)" stroke-width="8" stroke-linecap="round"/>
+  <!-- Magnifier handle -->
+  <path d="M210 330l-58 58c-8 8-8 20 0 28s20 8 28 0l58-58"
+        fill="#155fb2"/>
+  <!-- Magnifier ring -->
+  <circle cx="260" cy="280" r="78" fill="#0e5fc4"/>
+  <circle cx="260" cy="280" r="58" fill="#ffffff"/>
+  <!-- Check mark inside -->
+  <path d="M238 282l16 16 34-40"
+        fill="none" stroke="#36c46a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Optional subtle shadow behind magnifier -->
+  <ellipse cx="260" cy="362" rx="92" ry="18" fill="rgba(0,0,0,0.08)"/>
+</svg>
