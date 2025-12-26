@@ -9,6 +9,7 @@
 </h1>
 
 <p><strong>Document-grounded Q&A with verifiable citations</strong></p>
+<p><strong>Live demo:</strong> <a href="https://grounded-ai.vercel.app/">https://grounded-ai.vercel.app/</a></p>
 
 
 ---
